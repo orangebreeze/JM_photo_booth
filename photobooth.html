@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Foto — Photo Booth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f5f0e8;
+    --charcoal: #1a1a1a;
+    --warm-mid: #2d2520;
+    --accent-gold: #c9a96e;
+    --accent-rust: #b5522a;
+    --muted: #8a8078;
+    --strip-white: #ffffff;
+    --film-dark: #111010;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--charcoal);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #app {
+    height: 100dvh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── MENU SCREEN ── */
+  #menu-screen {
+    background: var(--charcoal);
+    padding: env(safe-area-inset-top, 20px) 0 env(safe-area-inset-bottom, 20px);
+  }
+
+  .menu-header {
+    padding: 28px 28px 0;
+    flex-shrink: 0;
+  }
+
+  .menu-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: var(--cream);
+    line-height: 1;
+  }
+
+  .menu-logo span {
+    color: var(--accent-gold);
+  }
+
+  .menu-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .mode-list {
+    flex: 1;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+  .mode-card {
+    border-radius: 18px;
+    padding: 22px 22px 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.18s ease, filter 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+
+  .mode-card:active { transform: scale(0.97); }
+
+  .mode-card.vintage {
+    background: #f0ebe0;
+    color: #1a1a1a;
+  }
+  .mode-card.instagram {
+    background: linear-gradient(135deg, #ff6b35 0%, #e91e8c 50%, #8b31cc 100%);
+    color: #fff;
+  }
+  .mode-card.disposable {
+    background: #1c1412;
+    color: var(--cream);
+    border: 1px solid #3a2e28;
+  }
+
+  .mode-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .mode-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+
+  .mode-desc {
+    font-size: 13px;
+    font-weight: 300;
+    opacity: 0.7;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .mode-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .mode-tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    opacity: 0.8;
+  }
+
+  .vintage .mode-tag { background: rgba(0,0,0,0.1); color: #1a1a1a; }
+  .instagram .mode-tag { background: rgba(255,255,255,0.2); color: #fff; }
+  .disposable .mode-tag { background: rgba(201,169,110,0.2); color: var(--accent-gold); }
+
+  .mode-strip-preview {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 3px;
+    opacity: 0.35;
+  }
+  .mode-strip-preview .thumb {
+    width: 10px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+
+  /* ── CAMERA SCREEN ── */
+  #camera-screen {
+    background: #000;
+  }
+
+  #video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+  }
+
+  .camera-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+
+  .camera-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(env(safe-area-inset-top, 20px) + 14px) 20px 14px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+    pointer-events: all;
+  }
+
+  .cam-back-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(8px);
+  }
+
+  .cam-mode-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  .cam-spacer { width: 40px; }
+
+  .shot-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    pointer-events: none;
+  }
+
+  .shot-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .shot-dot.taken { background: #fff; transform: scale(1.2); }
+  .shot-dot.current { background: var(--accent-gold); border-color: var(--accent-gold); }
+
+  .camera-bottom {
+    margin-top: auto;
+    padding: 0 28px calc(env(safe-area-inset-bottom, 30px) + 20px);
+    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: all;
+  }
+
+  .shutter-btn {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: 4px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.1s, background 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .shutter-btn::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: #fff;
+    transition: background 0.1s;
+  }
+  .shutter-btn:active { transform: scale(0.93); }
+  .shutter-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .shutter-hint {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+
+  /* ── COUNTDOWN ── */
+  #countdown-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 10;
+  }
+  #countdown-overlay.active { opacity: 1; }
+
+  .countdown-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 140px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 4px 40px rgba(0,0,0,0.5);
+    line-height: 1;
+    animation: countPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes countPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── FLASH ── */
+  #flash-overlay {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* ── RESULT SCREEN ── */
+  #result-screen {
+    background: var(--warm-mid);
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top, 20px);
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 10px;
+    flex-shrink: 0;
+  }
+
+  .result-back {
+    font-size: 13px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    -webkit-tap-highlight-color: transparent;
+    padding: 8px 0;
+  }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--cream);
+  }
+
+  .result-spacer { width: 60px; }
+
+  .result-canvas-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+
+  #result-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    display: block;
+  }
+
+  .result-actions {
+    padding: 12px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    background: var(--accent-gold);
+    color: #1a1a1a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .save-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+  .retake-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+  .retake-btn:active { background: rgba(255,255,255,0.08); }
+
+  /* ── ERROR / PERMISSION ── */
+  #perm-screen {
+    background: var(--charcoal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+  .perm-icon { font-size: 48px; }
+  .perm-title { font-family: 'Playfair Display', serif; font-size: 22px; }
+  .perm-body { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .perm-retry {
+    margin-top: 8px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: 1.5px solid var(--accent-gold);
+    background: transparent;
+    color: var(--accent-gold);
+    font-size: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 20px) + 80px);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(255,255,255,0.95);
+    color: #111;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 24px;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap;
+    z-index: 999;
+    pointer-events: none;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- MENU -->
+  <div id="menu-screen" class="screen active">
+    <div class="menu-header">
+      <div class="menu-logo">foto<span>.</span></div>
+      <div class="menu-tagline">Choose your aesthetic</div>
+    </div>
+    <div class="mode-list">
+
+      <div class="mode-card vintage" data-mode="vintage" onclick="selectMode('vintage')">
+        <span class="mode-num">01 / CLASSIC</span>
+        <div class="mode-name">Vintage Strip</div>
+        <div class="mode-desc">Three shots, stitched vertically. Grayscale with clean white borders — just like the real thing.</div>
+        <div class="mode-meta">
+          <span class="mode-tag">3 photos</span>
+          <span class="mode-tag">B&W</span>
+          <span class="mode-tag">Vertical strip</span>
+        </div>
+        <div class="mode-strip-preview" style="color: #1a1a1a;">
+          <div class="thumb" style="height:44px"></div>
+          <div class="thumb" style="height:44px"></div>
+          <div class="thumb" style="height:44px"></div>
+        </div>
+      </div>
+
+      <div class="mode-card instagram" data-mode="instagram" onclick="selectMode('instagram')">
+        <span class="mode-num" style="opacity:0.6;">02 / SOCIAL</span>
+        <div class="mode-name">Instagram Grid</div>
+        <div class="mode-desc">Four square frames in a seamless 2×2 grid. Vivid saturation for a thumb-stopping feed drop.</div>
+        <div class="mode-meta">
+          <span class="mode-tag">4 photos</span>
+          <span class="mode-tag">1:1 crop</span>
+          <span class="mode-tag">2×2 grid</span>
+        </div>
+        <div class="mode-strip-preview" style="color: #fff; flex-direction: column; gap: 3px; right: 18px;">
+          <div style="display:flex;gap:3px;">
+            <div class="thumb" style="height:18px;width:18px;border-radius:2px"></div>
+            <div class="thumb" style="height:18px;width:18px;border-radius:2px"></div>
+          </div>
+          <div style="display:flex;gap:3px;">
+            <div class="thumb" style="height:18px;width:18px;border-radius:2px"></div>
+            <div class="thumb" style="height:18px;width:18px;border-radius:2px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-card disposable" data-mode="disposable" onclick="selectMode('disposable')">
+        <span class="mode-num">03 / CINEMATIC</span>
+        <div class="mode-name">Disposable Roll</div>
+        <div class="mode-desc">Four frames on a horizontal film strip. Warm tones, boosted reds, muted blues — pure 90s nostalgia.</div>
+        <div class="mode-meta">
+          <span class="mode-tag">4 photos</span>
+          <span class="mode-tag">Warm film</span>
+          <span class="mode-tag">Horizontal strip</span>
+        </div>
+        <div class="mode-strip-preview" style="color: var(--accent-gold); flex-direction: row; right: 18px; top: auto; transform: none; bottom: 18px;">
+          <div class="thumb" style="height:28px;width:18px;border-radius:2px"></div>
+          <div class="thumb" style="height:28px;width:18px;border-radius:2px"></div>
+          <div class="thumb" style="height:28px;width:18px;border-radius:2px"></div>
+          <div class="thumb" style="height:28px;width:18px;border-radius:2px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMERA -->
+  <div id="camera-screen" class="screen">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="camera-overlay">
+      <div class="camera-top-bar">
+        <button class="cam-back-btn" onclick="goToMenu()">&#8592;</button>
+        <div class="cam-mode-label" id="cam-mode-label">—</div>
+        <div class="cam-spacer"></div>
+      </div>
+      <div class="shot-indicators" id="shot-indicators"></div>
+      <div style="flex:1;"></div>
+      <div class="camera-bottom">
+        <button class="shutter-btn" id="shutter-btn" onclick="startSession()"></button>
+        <div class="shutter-hint" id="shutter-hint">Tap to begin</div>
+      </div>
+    </div>
+    <div id="countdown-overlay">
+      <div class="countdown-num" id="countdown-num">3</div>
+    </div>
+    <div id="flash-overlay"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen" class="screen">
+    <div class="result-header">
+      <button class="result-back" onclick="goToMenu()">← Menu</button>
+      <div class="result-title" id="result-title">Your Shot</div>
+      <div class="result-spacer"></div>
+    </div>
+    <div class="result-canvas-wrap">
+      <canvas id="result-canvas"></canvas>
+    </div>
+    <div class="result-actions">
+      <button class="save-btn" onclick="saveImage()">Save to Photos</button>
+      <button class="retake-btn" onclick="retake()">Retake</button>
+    </div>
+  </div>
+
+  <!-- PERMISSION ERROR -->
+  <div id="perm-screen" class="screen">
+    <div class="perm-icon">📷</div>
+    <div class="perm-title">Camera Access Needed</div>
+    <div class="perm-body">Foto needs access to your camera to take photos. Please allow camera access in your browser settings and try again.</div>
+    <button class="perm-retry" onclick="retryCamera()">Try Again</button>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let currentMode = null;
+let stream = null;
+let capturedFrames = [];
+let isCapturing = false;
+let pendingMode = null;
+
+const MODES = {
+  vintage: {
+    label: 'Classic Vintage Strip',
+    count: 3,
+    layout: 'vertical-strip',
+  },
+  instagram: {
+    label: 'Instagram Style',
+    count: 4,
+    layout: 'grid-2x2',
+  },
+  disposable: {
+    label: '90s Disposable Roll',
+    count: 4,
+    layout: 'horizontal-strip',
+  }
+};
+
+// ─── SCREEN NAV ──────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── MENU ────────────────────────────────────────────────
+async function selectMode(mode) {
+  currentMode = mode;
+  pendingMode = mode;
+  capturedFrames = [];
+
+  document.getElementById('cam-mode-label').textContent = MODES[mode].label;
+  buildShotIndicators(MODES[mode].count);
+  document.getElementById('shutter-hint').textContent = 'Tap to begin';
+  document.getElementById('shutter-btn').disabled = false;
+
+  showScreen('camera-screen');
+  await startCamera();
+}
+
+function goToMenu() {
+  stopCamera();
+  isCapturing = false;
+  capturedFrames = [];
+  showScreen('menu-screen');
+}
+
+function retake() {
+  capturedFrames = [];
+  buildShotIndicators(MODES[currentMode].count);
+  document.getElementById('shutter-btn').disabled = false;
+  document.getElementById('shutter-hint').textContent = 'Tap to begin';
+  showScreen('camera-screen');
+}
+
+// ─── CAMERA ──────────────────────────────────────────────
+async function startCamera() {
+  try {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+    await video.play();
+  } catch (e) {
+    stopCamera();
+    showScreen('perm-screen');
+  }
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  const v = document.getElementById('video');
+  v.srcObject = null;
+}
+
+function retryCamera() { selectMode(currentMode || 'vintage'); }
+
+// ─── SHOT INDICATORS ─────────────────────────────────────
+function buildShotIndicators(count) {
+  const wrap = document.getElementById('shot-indicators');
+  wrap.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'shot-dot';
+    d.id = `dot-${i}`;
+    wrap.appendChild(d);
+  }
+}
+
+function updateDot(index, state) {
+  const count = MODES[currentMode].count;
+  for (let i = 0; i < count; i++) {
+    const d = document.getElementById(`dot-${i}`);
+    if (!d) continue;
+    d.className = 'shot-dot';
+    if (i < index) d.classList.add('taken');
+    else if (i === index) d.classList.add('current');
+  }
+}
+
+// ─── SESSION ─────────────────────────────────────────────
+async function startSession() {
+  if (isCapturing) return;
+  isCapturing = true;
+  capturedFrames = [];
+  const btn = document.getElementById('shutter-btn');
+  btn.disabled = true;
+
+  const count = MODES[currentMode].count;
+
+  // Initial countdown 3-2-1
+  await countdown(3);
+
+  for (let i = 0; i < count; i++) {
+    updateDot(i, 'current');
+    document.getElementById('shutter-hint').textContent = `Shot ${i + 1} of ${count}`;
+    captureFrame();
+    await flashEffect();
+
+    if (i < count - 1) {
+      // Between shots — brief pause + mini count
+      await sleep(300);
+      await miniCountdown();
+    }
+  }
+
+  // Mark all done
+  updateDot(count, 'done');
+  document.getElementById('shutter-hint').textContent = 'Processing…';
+  await sleep(200);
+
+  isCapturing = false;
+  buildResult();
+}
+
+async function countdown(from) {
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl = document.getElementById('countdown-num');
+  overlay.classList.add('active');
+  for (let n = from; n >= 1; n--) {
+    numEl.textContent = n;
+    // Re-trigger animation
+    numEl.style.animation = 'none';
+    numEl.offsetHeight;
+    numEl.style.animation = '';
+    await sleep(900);
+  }
+  overlay.classList.remove('active');
+  await sleep(100);
+}
+
+async function miniCountdown() {
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl = document.getElementById('countdown-num');
+  overlay.classList.add('active');
+  for (let n = 2; n >= 1; n--) {
+    numEl.textContent = n;
+    numEl.style.animation = 'none';
+    numEl.offsetHeight;
+    numEl.style.animation = '';
+    await sleep(700);
+  }
+  overlay.classList.remove('active');
+  await sleep(80);
+}
+
+function captureFrame() {
+  const video = document.getElementById('video');
+  const cvs = document.createElement('canvas');
+  cvs.width = video.videoWidth || 1280;
+  cvs.height = video.videoHeight || 720;
+  const ctx = cvs.getContext('2d');
+  ctx.translate(cvs.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0);
+  capturedFrames.push(cvs);
+}
+
+async function flashEffect() {
+  const fl = document.getElementById('flash-overlay');
+  fl.style.transition = 'none';
+  fl.style.opacity = '1';
+  await sleep(60);
+  fl.style.transition = 'opacity 0.35s ease';
+  fl.style.opacity = '0';
+  await sleep(350);
+}
+
+// ─── RESULT BUILDING ─────────────────────────────────────
+function buildResult() {
+  const canvas = document.getElementById('result-canvas');
+  const mode = currentMode;
+
+  switch (mode) {
+    case 'vintage': buildVintage(canvas); break;
+    case 'instagram': buildInstagram(canvas); break;
+    case 'disposable': buildDisposable(canvas); break;
+  }
+
+  const titles = {
+    vintage: 'Classic Strip',
+    instagram: 'Grid',
+    disposable: 'Film Roll'
+  };
+  document.getElementById('result-title').textContent = titles[mode];
+  showScreen('result-screen');
+}
+
+// ─ MODE 1: VINTAGE STRIP ─────────────────────────────────
+function buildVintage(canvas) {
+  const border = 28;
+  const gap = 20;
+  const photoW = 400;
+  const photoH = Math.round(photoW * (3 / 4));
+
+  canvas.width = photoW + border * 2;
+  canvas.height = photoH * 3 + gap * 2 + border * 2;
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  capturedFrames.forEach((frame, i) => {
+    const y = border + i * (photoH + gap);
+    const bw = toGrayscale(frame, photoW, photoH);
+    ctx.drawImage(bw, border, y, photoW, photoH);
+  });
+}
+
+function toGrayscale(srcCanvas, w, h) {
+  const cvs = document.createElement('canvas');
+  cvs.width = w; cvs.height = h;
+  const ctx = cvs.getContext('2d');
+
+  // Draw + crop center
+  const src = srcCanvas;
+  const srcRatio = src.width / src.height;
+  const dstRatio = w / h;
+  let sx, sy, sw, sh;
+  if (srcRatio > dstRatio) {
+    sh = src.height; sw = sh * dstRatio;
+    sx = (src.width - sw) / 2; sy = 0;
+  } else {
+    sw = src.width; sh = sw / dstRatio;
+    sx = 0; sy = (src.height - sh) / 2;
+  }
+  ctx.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
+
+  const id = ctx.getImageData(0, 0, w, h);
+  const d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const g = Math.round(0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]);
+    const contrast = clamp(Math.round((g - 128) * 1.25 + 128), 0, 255);
+    d[i] = d[i+1] = d[i+2] = contrast;
+  }
+  ctx.putImageData(id, 0, 0);
+  return cvs;
+}
+
+// ─ MODE 2: INSTAGRAM 2×2 ─────────────────────────────────
+function buildInstagram(canvas) {
+  const cell = 400;
+  canvas.width = cell * 2;
+  canvas.height = cell * 2;
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  capturedFrames.forEach((frame, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const vivid = applyVivid(frame, cell, cell);
+    ctx.drawImage(vivid, col * cell, row * cell, cell, cell);
+  });
+}
+
+function applyVivid(srcCanvas, w, h) {
+  const cvs = document.createElement('canvas');
+  cvs.width = w; cvs.height = h;
+  const ctx = cvs.getContext('2d');
+
+  // Square crop from center
+  const src = srcCanvas;
+  const side = Math.min(src.width, src.height);
+  const sx = (src.width - side) / 2;
+  const sy = (src.height - side) / 2;
+  ctx.drawImage(src, sx, sy, side, side, 0, 0, w, h);
+
+  const id = ctx.getImageData(0, 0, w, h);
+  const d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    // Saturation boost via HSL shift approximation
+    const r = d[i] / 255, g = d[i+1] / 255, b = d[i+2] / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    const delta = max - min;
+
+    if (delta > 0) {
+      const sat = delta / (1 - Math.abs(2 * l - 1));
+      const newSat = Math.min(sat * 1.9, 1);
+      const scale = newSat / sat;
+      const mid = (r + g + b) / 3;
+      d[i]   = clamp(Math.round((r - mid) * scale * 1.05 + mid) * 255, 0, 255);
+      d[i+1] = clamp(Math.round((g - mid) * scale * 1.05 + mid) * 255, 0, 255);
+      d[i+2] = clamp(Math.round((b - mid) * scale * 1.05 + mid) * 255, 0, 255);
+    } else {
+      d[i] = d[i+1] = d[i+2] = clamp(Math.round(l * 255), 0, 255);
+    }
+  }
+  ctx.putImageData(id, 0, 0);
+  return cvs;
+}
+
+// ─ MODE 3: DISPOSABLE HORIZONTAL ─────────────────────────
+function buildDisposable(canvas) {
+  const border = 30;
+  const gap = 22;
+  const frameW = 280;
+  const frameH = Math.round(frameW * (4 / 3));
+
+  canvas.width = frameW * 4 + gap * 3 + border * 2;
+  canvas.height = frameH + border * 2;
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#111010';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Sprocket holes decorative
+  drawSprockets(ctx, canvas.width, canvas.height, border);
+
+  capturedFrames.forEach((frame, i) => {
+    const x = border + i * (frameW + gap);
+    const warm = applyWarm(frame, frameW, frameH);
+    // Slight vignette frame border
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x - 1, border - 1, frameW + 2, frameH + 2);
+    ctx.restore();
+    ctx.drawImage(warm, x, border, frameW, frameH);
+  });
+}
+
+function drawSprockets(ctx, W, H, b) {
+  // Film edge sprocket holes top and bottom
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  const holeW = 10, holeH = 8, spacing = 36;
+  const rows = [[4, H - 4 - holeH]];
+  rows.push([H / 2 - 4 - holeH, H / 2 + 4]);
+
+  for (let x = b; x < W - b; x += spacing) {
+    ctx.beginPath();
+    ctx.roundRect(x, 4, holeW, holeH, 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(x, H - 4 - holeH, holeW, holeH, 2);
+    ctx.fill();
+  }
+}
+
+function applyWarm(srcCanvas, w, h) {
+  const cvs = document.createElement('canvas');
+  cvs.width = w; cvs.height = h;
+  const ctx = cvs.getContext('2d');
+
+  const src = srcCanvas;
+  const srcRatio = src.width / src.height;
+  const dstRatio = w / h;
+  let sx, sy, sw, sh;
+  if (srcRatio > dstRatio) {
+    sh = src.height; sw = sh * dstRatio;
+    sx = (src.width - sw) / 2; sy = 0;
+  } else {
+    sw = src.width; sh = sw / dstRatio;
+    sx = 0; sy = (src.height - sh) / 2;
+  }
+  ctx.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
+
+  const id = ctx.getImageData(0, 0, w, h);
+  const d = id.data;
+
+  for (let i = 0; i < d.length; i += 4) {
+    // Warm film: boost reds/yellows, mute blues
+    let r = d[i], g = d[i+1], b = d[i+2];
+
+    // Boost warm channel
+    r = clamp(Math.round(r * 1.12 + 12), 0, 255);
+    g = clamp(Math.round(g * 1.04 + 4), 0, 255);
+    b = clamp(Math.round(b * 0.82 - 8), 0, 255);
+
+    // Slight desaturation toward cream
+    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+    r = clamp(Math.round(lum * 0.18 + r * 0.82), 0, 255);
+    g = clamp(Math.round(lum * 0.18 + g * 0.82), 0, 255);
+    b = clamp(Math.round(lum * 0.18 + b * 0.82), 0, 255);
+
+    d[i] = r; d[i+1] = g; d[i+2] = b;
+  }
+  ctx.putImageData(id, 0, 0);
+
+  // Vignette overlay
+  const vgr = ctx.createRadialGradient(w/2, h/2, Math.min(w,h)*0.3, w/2, h/2, Math.max(w,h)*0.75);
+  vgr.addColorStop(0, 'rgba(0,0,0,0)');
+  vgr.addColorStop(1, 'rgba(0,0,0,0.4)');
+  ctx.fillStyle = vgr;
+  ctx.fillRect(0, 0, w, h);
+
+  return cvs;
+}
+
+// ─── SAVE ────────────────────────────────────────────────
+function saveImage() {
+  const canvas = document.getElementById('result-canvas');
+  try {
+    const dataUrl = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `foto-${currentMode}-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Saved! Check your Photos 🎞');
+  } catch (e) {
+    // iOS Safari fallback — open in new tab for long-press save
+    const dataUrl = canvas.toDataURL('image/png');
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write(`<img src="${dataUrl}" style="max-width:100%;display:block;" />`);
+      w.document.title = 'Long-press to save to Photos';
+    } else {
+      showToast('Long-press the image to save');
+    }
+  }
+}
+
+// ─── UTILITIES ───────────────────────────────────────────
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
