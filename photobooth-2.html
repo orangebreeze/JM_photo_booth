@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#fdf6f9">
+<title>✿ foto booth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blush:    #fde8f0;
+  --petal:    #f7c5d8;
+  --rose:     #e8789a;
+  --lavender: #ede0f7;
+  --lilac:    #c9a8e8;
+  --violet:   #9b6dc5;
+  --butter:   #fff8e7;
+  --marigold: #f5c842;
+  --ink:      #2e1a2e;
+  --soft-ink: #5c3d5c;
+  --mist:     #f9f2fb;
+  --film-bg:  #120d0f;
+  --film-gold:#d4a94a;
+  --white:    #ffffff;
+  --shadow-soft: 0 8px 32px rgba(180,100,160,0.13);
+}
+
+html, body {
+  height: 100%; width: 100%;
+  overflow: hidden;
+  background: var(--mist);
+  color: var(--ink);
+  font-family: 'Quicksand', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none; -webkit-user-select: none;
+}
+
+#app {
+  height: 100dvh; width: 100%;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.38s ease;
+}
+.screen.active { opacity: 1; pointer-events: all; }
+
+/* ══════════════════════════════════════
+   MENU SCREEN — cute girly design
+══════════════════════════════════════ */
+#menu-screen {
+  background: var(--mist);
+  padding-top: env(safe-area-inset-top, 20px);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  overflow-y: auto;
+}
+
+/* decorative bg blobs */
+#menu-screen::before {
+  content: '';
+  position: fixed; top: -80px; right: -60px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, #fde8f0 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none; z-index: 0;
+}
+#menu-screen::after {
+  content: '';
+  position: fixed; bottom: 60px; left: -80px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, #ede0f7 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none; z-index: 0;
+}
+
+.menu-inner { position: relative; z-index: 1; }
+
+.menu-header {
+  padding: 28px 26px 4px;
+  text-align: center;
+}
+
+.menu-deco {
+  font-size: 28px;
+  letter-spacing: 6px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.menu-logo {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 46px;
+  font-weight: 400;
+  color: var(--rose);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.menu-logo-dot {
+  color: var(--violet);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.menu-tagline {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lilac);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 8px;
+  display: block;
+}
+
+.menu-divider {
+  display: flex; align-items: center;
+  gap: 10px;
+  padding: 18px 26px 6px;
+  color: var(--petal);
+  font-size: 16px;
+}
+.menu-divider::before, .menu-divider::after {
+  content: ''; flex: 1;
+  height: 1px; background: var(--petal);
+}
+
+.mode-list {
+  padding: 6px 18px 24px;
+  display: flex; flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Mode Cards ── */
+.mode-card {
+  border-radius: 22px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+.mode-card:active { transform: scale(0.96) !important; }
+
+/* Card 1: Vintage — soft cream */
+.mode-card.vintage {
+  background: #fffaf4;
+  border: 1.5px solid #f0dfc8;
+  box-shadow: 0 4px 20px rgba(200,150,100,0.1);
+  padding: 20px 20px 18px;
+}
+.mode-card.vintage:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,150,100,0.18); }
+
+/* Card 2: Pastel — dreamy pink/lavender */
+.mode-card.pastel {
+  background: linear-gradient(140deg, #fde8f0 0%, #f0e2f8 55%, #e8eeff 100%);
+  border: 1.5px solid #f0c8e0;
+  box-shadow: 0 4px 20px rgba(200,120,180,0.15);
+  padding: 20px 20px 18px;
+}
+.mode-card.pastel:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,120,180,0.25); }
+
+/* Card 3: Film — dark hero card */
+.mode-card.disposable {
+  background: var(--film-bg);
+  border: 1.5px solid #2e2020;
+  box-shadow: 0 6px 32px rgba(10,5,8,0.35);
+  padding: 28px 24px 24px;  /* bigger padding = more prominent */
+  transform: scale(1.02);    /* slightly larger */
+}
+.mode-card.disposable:hover { transform: scale(1.02) translateY(-3px); box-shadow: 0 12px 40px rgba(10,5,8,0.45); }
+.mode-card.disposable:active { transform: scale(0.98) !important; }
+
+/* film card accent bar */
+.mode-card.disposable::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--film-gold), #e8c870, var(--film-gold));
+}
+
+.mode-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+  margin-bottom: 10px;
+}
+.vintage .mode-badge  { background: #f5e8d4; color: #a07040; }
+.pastel  .mode-badge  { background: rgba(200,120,200,0.15); color: #9060b0; }
+.disposable .mode-badge { background: rgba(212,169,74,0.2); color: var(--film-gold); }
+
+.mode-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 6px;
+}
+.vintage .mode-name    { font-size: 20px; color: #3a2a1a; }
+.pastel  .mode-name    { font-size: 20px; color: var(--soft-ink); }
+.disposable .mode-name { font-size: 24px; color: #f5ede0; }
+
+.mode-desc {
+  font-size: 13px; font-weight: 500; line-height: 1.55;
+  margin-bottom: 14px;
+}
+.vintage .mode-desc    { color: #7a6050; }
+.pastel  .mode-desc    { color: #8060a0; }
+.disposable .mode-desc { color: #9a8878; }
+
+.mode-meta { display: flex; gap: 7px; flex-wrap: wrap; }
+.mode-tag {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+}
+.vintage .mode-tag    { background: rgba(0,0,0,0.06); color: #6a5040; }
+.pastel  .mode-tag    { background: rgba(150,80,180,0.1); color: #7050a0; }
+.disposable .mode-tag { background: rgba(212,169,74,0.15); color: #c09830; }
+
+/* preview thumbnails */
+.card-preview {
+  position: absolute; opacity: 0.22;
+}
+.vintage .card-preview  { right: 14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 3px; }
+.pastel  .card-preview  { right: 14px; top: 50%; transform: translateY(-50%); display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.disposable .card-preview { right: 16px; bottom: 18px; display: flex; flex-direction: row; gap: 3px; }
+.card-preview .th {
+  background: currentColor; border-radius: 2px;
+}
+
+/* ══════════════════════════════════════
+   CAMERA SCREEN
+══════════════════════════════════════ */
+#camera-screen { background: #000; }
+
+#video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.camera-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  pointer-events: none;
+}
+
+.camera-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 20px) + 14px) 20px 14px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%);
+  pointer-events: all;
+}
+
+.cam-back-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); border: none;
+  color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(8px);
+}
+
+.cam-mode-label {
+  font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.92); letter-spacing: 0.04em;
+  text-align: center;
+}
+.cam-spacer { width: 40px; }
+
+.shot-indicators {
+  display: flex; justify-content: center; gap: 8px;
+  padding: 12px; pointer-events: none;
+}
+.shot-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.28);
+  border: 1.5px solid rgba(255,255,255,0.55);
+  transition: background 0.2s, transform 0.2s;
+}
+.shot-dot.taken   { background: #fff; transform: scale(1.2); }
+.shot-dot.current { background: var(--rose); border-color: var(--petal); transform: scale(1.3); }
+
+.camera-bottom {
+  margin-top: auto;
+  padding: 0 28px calc(env(safe-area-inset-bottom, 30px) + 20px);
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  pointer-events: all;
+}
+
+.shutter-btn {
+  width: 82px; height: 82px; border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  border: 4px solid rgba(255,255,255,0.35);
+  cursor: pointer; outline: none;
+  transition: transform 0.12s; position: relative; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.shutter-btn::after {
+  content: ''; position: absolute; inset: 7px;
+  border-radius: 50%; background: #fff;
+}
+.shutter-btn:active { transform: scale(0.92); }
+.shutter-btn:disabled { opacity: 0.4; cursor: default; }
+
+.shutter-hint {
+  font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.65); letter-spacing: 0.06em; text-align: center;
+}
+
+/* countdown */
+#countdown-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.32);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s; z-index: 10;
+}
+#countdown-overlay.active { opacity: 1; }
+
+.countdown-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 150px; font-weight: 700; color: #fff;
+  text-shadow: 0 0 60px rgba(253,200,220,0.6);
+  line-height: 1;
+  animation: countPop 0.38s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes countPop {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+#flash-overlay {
+  position: absolute; inset: 0; background: #fff;
+  opacity: 0; pointer-events: none; z-index: 20;
+}
+
+/* ══════════════════════════════════════
+   RESULT SCREEN — screenshot mode
+══════════════════════════════════════ */
+#result-screen {
+  background: #1a1218;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top, 20px);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.result-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 8px; flex-shrink: 0;
+}
+.result-back {
+  font-size: 13px; font-weight: 600; color: #9a7898;
+  background: none; border: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; padding: 8px 0;
+}
+.result-title {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 17px; color: #f5e8f0;
+}
+.result-spacer { width: 60px; }
+
+/* screenshot prompt banner */
+.screenshot-banner {
+  margin: 0 18px 10px;
+  background: rgba(253,232,240,0.1);
+  border: 1px solid rgba(253,200,220,0.2);
+  border-radius: 14px;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.ss-icon { font-size: 20px; }
+.ss-text { font-size: 12px; font-weight: 600; color: #d0a0c0; line-height: 1.45; }
+.ss-text strong { color: #f0c0d8; display: block; font-size: 13px; }
+
+.result-canvas-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 4px 14px 8px; overflow: hidden;
+}
+#result-canvas {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain; border-radius: 6px; display: block;
+}
+
+.result-actions {
+  padding: 6px 20px 4px;
+  display: flex; flex-direction: column; gap: 9px; flex-shrink: 0;
+}
+
+/* "Screenshot" primary action */
+.screenshot-btn {
+  width: 100%; padding: 16px;
+  border-radius: 16px; border: none;
+  background: linear-gradient(135deg, var(--rose) 0%, var(--violet) 100%);
+  color: #fff; font-family: 'Quicksand', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.02em;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s, transform 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.screenshot-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+/* download fallback (secondary) */
+.save-btn {
+  width: 100%; padding: 13px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: transparent; color: #9a7898;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.save-btn:active { background: rgba(255,255,255,0.06); }
+
+.retake-btn {
+  width: 100%; padding: 12px;
+  border-radius: 14px; border: none;
+  background: transparent; color: #6a4868;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+
+/* ── screenshot clean mode (hide chrome) ── */
+body.screenshot-mode .result-header,
+body.screenshot-mode .screenshot-banner,
+body.screenshot-mode .result-actions,
+body.screenshot-mode #result-screen { background: #000; }
+body.screenshot-mode .result-canvas-wrap { padding: 0; }
+body.screenshot-mode #result-canvas { border-radius: 0; max-height: 100dvh; }
+
+/* ── PERMISSION SCREEN ── */
+#perm-screen {
+  background: var(--mist);
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 40px; text-align: center;
+}
+.perm-icon { font-size: 52px; }
+.perm-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 24px; color: var(--rose); }
+.perm-body  { font-size: 14px; font-weight: 500; color: var(--soft-ink); line-height: 1.6; max-width: 280px; }
+.perm-retry {
+  margin-top: 6px; padding: 14px 32px;
+  border-radius: 16px; border: 2px solid var(--rose);
+  background: transparent; color: var(--rose);
+  font-family: 'Quicksand', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 20px) + 90px);
+  left: 50%; transform: translateX(-50%) translateY(16px);
+  background: #fff; color: var(--ink);
+  font-size: 13px; font-weight: 600;
+  padding: 10px 22px; border-radius: 24px;
+  opacity: 0; transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap; z-index: 999; pointer-events: none;
+  box-shadow: 0 4px 20px rgba(180,100,160,0.2);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ MENU ══════════════════════════════════════════════ -->
+<div id="menu-screen" class="screen active">
+  <div class="menu-inner">
+    <div class="menu-header">
+      <span class="menu-deco">🌸 ✿ 🌸</span>
+      <div class="menu-logo">foto<span class="menu-logo-dot">.</span></div>
+      <span class="menu-tagline">✦ pick your vibe ✦</span>
+    </div>
+
+    <div class="menu-divider">✿</div>
+
+    <div class="mode-list">
+
+      <!-- CARD 1: Vintage -->
+      <div class="mode-card vintage" onclick="selectMode('vintage')">
+        <div class="mode-badge">01 ✦ Classic</div>
+        <div class="mode-name">Vintage Strip</div>
+        <div class="mode-desc">Three dreamy B&W shots stitched into a classic photo strip with clean white borders.</div>
+        <div class="mode-meta">
+          <span class="mode-tag">3 photos</span>
+          <span class="mode-tag">B&W</span>
+          <span class="mode-tag">Vertical</span>
+        </div>
+        <div class="card-preview" style="color:#3a2a1a;">
+          <div class="th" style="width:9px;height:40px;"></div>
+          <div class="th" style="width:9px;height:40px;"></div>
+          <div class="th" style="width:9px;height:40px;"></div>
+        </div>
+      </div>
+
+      <!-- CARD 2: Pastel Kawaii -->
+      <div class="mode-card pastel" onclick="selectMode('pastel')">
+        <div class="mode-badge">02 ✦ Kawaii</div>
+        <div class="mode-name">Soft Pastel Grid</div>
+        <div class="mode-desc">Four square frames with a dreamy pink-lavender glow. Airy, soft &amp; totally adorable.</div>
+        <div class="mode-meta">
+          <span class="mode-tag">4 photos</span>
+          <span class="mode-tag">1:1 square</span>
+          <span class="mode-tag">2×2 grid</span>
+        </div>
+        <div class="card-preview" style="color:#9060b0;">
+          <div class="th" style="width:16px;height:16px;border-radius:3px;"></div>
+          <div class="th" style="width:16px;height:16px;border-radius:3px;"></div>
+          <div class="th" style="width:16px;height:16px;border-radius:3px;"></div>
+          <div class="th" style="width:16px;height:16px;border-radius:3px;"></div>
+        </div>
+      </div>
+
+      <!-- CARD 3: Disposable — HERO -->
+      <div class="mode-card disposable" onclick="selectMode('disposable')">
+        <div class="mode-badge">✦ FEATURED ✦</div>
+        <div class="mode-name">90s Disposable Roll</div>
+        <div class="mode-desc">Four frames on a dark cinematic film strip. Warm nostalgic tones, boosted reds, muted blues — pure 90s magic on a roll of uncut negatives.</div>
+        <div class="mode-meta">
+          <span class="mode-tag">4 photos</span>
+          <span class="mode-tag">Warm film</span>
+          <span class="mode-tag">Horizontal</span>
+          <span class="mode-tag">Cinematic</span>
+        </div>
+        <div class="card-preview" style="color:var(--film-gold);">
+          <div class="th" style="width:20px;height:30px;border-radius:2px;"></div>
+          <div class="th" style="width:20px;height:30px;border-radius:2px;"></div>
+          <div class="th" style="width:20px;height:30px;border-radius:2px;"></div>
+          <div class="th" style="width:20px;height:30px;border-radius:2px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAMERA ═════════════════════════════════════════════ -->
+<div id="camera-screen" class="screen">
+  <video id="video" autoplay playsinline muted></video>
+  <div class="camera-overlay">
+    <div class="camera-top-bar">
+      <button class="cam-back-btn" onclick="goToMenu()">←</button>
+      <div class="cam-mode-label" id="cam-mode-label">—</div>
+      <div class="cam-spacer"></div>
+    </div>
+    <div class="shot-indicators" id="shot-indicators"></div>
+    <div style="flex:1;"></div>
+    <div class="camera-bottom">
+      <button class="shutter-btn" id="shutter-btn" onclick="startSession()"></button>
+      <div class="shutter-hint" id="shutter-hint">tap to begin ✿</div>
+    </div>
+  </div>
+  <div id="countdown-overlay">
+    <div class="countdown-num" id="countdown-num">3</div>
+  </div>
+  <div id="flash-overlay"></div>
+</div>
+
+<!-- ══ RESULT ══════════════════════════════════════════════ -->
+<div id="result-screen" class="screen">
+  <div class="result-header">
+    <button class="result-back" onclick="goToMenu()">← menu</button>
+    <div class="result-title" id="result-title">your shot</div>
+    <div class="result-spacer"></div>
+  </div>
+
+  <div class="screenshot-banner" id="ss-banner">
+    <div class="ss-icon">📸</div>
+    <div class="ss-text">
+      <strong>Screenshot to save to Photos!</strong>
+      Tap the button below to go fullscreen, then take a screenshot.
+    </div>
+  </div>
+
+  <div class="result-canvas-wrap">
+    <canvas id="result-canvas"></canvas>
+  </div>
+
+  <div class="result-actions">
+    <button class="screenshot-btn" onclick="enterScreenshotMode()">
+      <span>📲</span> Fullscreen to Screenshot
+    </button>
+    <button class="save-btn" onclick="saveImage()">↓ Download to Files instead</button>
+    <button class="retake-btn" onclick="retake()">↩ Retake</button>
+  </div>
+</div>
+
+<!-- ══ PERMISSION ERROR ════════════════════════════════════ -->
+<div id="perm-screen" class="screen">
+  <div class="perm-icon">🌸</div>
+  <div class="perm-title">Camera needed!</div>
+  <div class="perm-body">foto needs your camera to capture the moment. Please allow access in your browser settings and try again.</div>
+  <button class="perm-retry" onclick="retryCamera()">Try Again ✿</button>
+</div>
+
+</div><!-- #app -->
+<div id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let currentMode = null;
+let stream = null;
+let capturedFrames = [];
+let isCapturing = false;
+let screenshotModeActive = false;
+
+const MODES = {
+  vintage:    { label: 'Vintage Strip ✦',    count: 3 },
+  pastel:     { label: 'Soft Pastel Grid 🌸', count: 4 },
+  disposable: { label: '90s Film Roll ✦',    count: 4 },
+};
+
+// ─── SCREEN NAV ──────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── SELECT MODE ─────────────────────────────────────────
+async function selectMode(mode) {
+  currentMode = mode;
+  capturedFrames = [];
+  exitScreenshotMode();
+
+  document.getElementById('cam-mode-label').textContent = MODES[mode].label;
+  buildShotIndicators(MODES[mode].count);
+  document.getElementById('shutter-hint').textContent = 'tap to begin ✿';
+  document.getElementById('shutter-btn').disabled = false;
+
+  showScreen('camera-screen');
+  await startCamera();
+}
+
+function goToMenu() {
+  stopCamera();
+  isCapturing = false;
+  capturedFrames = [];
+  exitScreenshotMode();
+  showScreen('menu-screen');
+}
+
+function retake() {
+  capturedFrames = [];
+  exitScreenshotMode();
+  buildShotIndicators(MODES[currentMode].count);
+  document.getElementById('shutter-btn').disabled = false;
+  document.getElementById('shutter-hint').textContent = 'tap to begin ✿';
+  showScreen('camera-screen');
+}
+
+// ─── SCREENSHOT MODE ─────────────────────────────────────
+function enterScreenshotMode() {
+  screenshotModeActive = true;
+  document.body.classList.add('screenshot-mode');
+  // Show toast after a beat
+  setTimeout(() => showToast('Take your screenshot now! 📸'), 400);
+  // Auto-exit after 8s
+  setTimeout(() => { if (screenshotModeActive) exitScreenshotMode(); }, 8000);
+  // Tap anywhere to exit
+  document.getElementById('result-canvas').addEventListener('click', exitScreenshotMode, { once: true });
+}
+
+function exitScreenshotMode() {
+  screenshotModeActive = false;
+  document.body.classList.remove('screenshot-mode');
+}
+
+// ─── CAMERA ──────────────────────────────────────────────
+async function startCamera() {
+  try {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+    await video.play();
+  } catch (e) {
+    stopCamera();
+    showScreen('perm-screen');
+  }
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  document.getElementById('video').srcObject = null;
+}
+
+function retryCamera() { selectMode(currentMode || 'vintage'); }
+
+// ─── SHOT DOTS ───────────────────────────────────────────
+function buildShotIndicators(count) {
+  const wrap = document.getElementById('shot-indicators');
+  wrap.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'shot-dot';
+    d.id = `dot-${i}`;
+    wrap.appendChild(d);
+  }
+}
+
+function updateDot(index) {
+  const count = MODES[currentMode].count;
+  for (let i = 0; i < count; i++) {
+    const d = document.getElementById(`dot-${i}`);
+    if (!d) continue;
+    d.className = 'shot-dot';
+    if (i < index)      d.classList.add('taken');
+    else if (i === index) d.classList.add('current');
+  }
+}
+
+// ─── CAPTURE SESSION ─────────────────────────────────────
+async function startSession() {
+  if (isCapturing) return;
+  isCapturing = true;
+  capturedFrames = [];
+  document.getElementById('shutter-btn').disabled = true;
+
+  const count = MODES[currentMode].count;
+
+  await countdown(3);
+
+  for (let i = 0; i < count; i++) {
+    updateDot(i);
+    document.getElementById('shutter-hint').textContent = `shot ${i + 1} of ${count}`;
+    captureFrame();
+    await flashEffect();
+    if (i < count - 1) {
+      await sleep(300);
+      await miniCountdown();
+    }
+  }
+
+  updateDot(count);
+  document.getElementById('shutter-hint').textContent = 'processing…';
+  await sleep(200);
+  isCapturing = false;
+  buildResult();
+}
+
+async function countdown(from) {
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl   = document.getElementById('countdown-num');
+  overlay.classList.add('active');
+  for (let n = from; n >= 1; n--) {
+    numEl.textContent = n;
+    numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = '';
+    await sleep(900);
+  }
+  overlay.classList.remove('active');
+  await sleep(100);
+}
+
+async function miniCountdown() {
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl   = document.getElementById('countdown-num');
+  overlay.classList.add('active');
+  for (let n = 2; n >= 1; n--) {
+    numEl.textContent = n;
+    numEl.style.animation = 'none'; numEl.offsetHeight; numEl.style.animation = '';
+    await sleep(650);
+  }
+  overlay.classList.remove('active');
+  await sleep(80);
+}
+
+function captureFrame() {
+  const video = document.getElementById('video');
+  const cvs   = document.createElement('canvas');
+  cvs.width   = video.videoWidth  || 1280;
+  cvs.height  = video.videoHeight || 720;
+  const ctx   = cvs.getContext('2d');
+  ctx.translate(cvs.width, 0); ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0);
+  capturedFrames.push(cvs);
+}
+
+async function flashEffect() {
+  const fl = document.getElementById('flash-overlay');
+  fl.style.transition = 'none'; fl.style.opacity = '1';
+  await sleep(55);
+  fl.style.transition = 'opacity 0.32s ease'; fl.style.opacity = '0';
+  await sleep(320);
+}
+
+// ─── BUILD RESULT ────────────────────────────────────────
+function buildResult() {
+  const canvas = document.getElementById('result-canvas');
+  if      (currentMode === 'vintage')    buildVintage(canvas);
+  else if (currentMode === 'pastel')     buildPastel(canvas);
+  else if (currentMode === 'disposable') buildDisposable(canvas);
+
+  const titles = { vintage:'Classic Strip', pastel:'Pastel Grid 🌸', disposable:'Film Roll' };
+  document.getElementById('result-title').textContent = titles[currentMode];
+  showScreen('result-screen');
+}
+
+// ── helpers ──────────────────────────────────────────────
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function cropToRatio(srcCanvas, w, h) {
+  const cvs = document.createElement('canvas');
+  cvs.width = w; cvs.height = h;
+  const ctx = cvs.getContext('2d');
+  const src = srcCanvas;
+  const srcR = src.width / src.height, dstR = w / h;
+  let sx, sy, sw, sh;
+  if (srcR > dstR) {
+    sh = src.height; sw = sh * dstR; sx = (src.width - sw) / 2; sy = 0;
+  } else {
+    sw = src.width; sh = sw / dstR; sx = 0; sy = (src.height - sh) / 2;
+  }
+  ctx.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
+  return cvs;
+}
+
+function cropSquare(srcCanvas, size) {
+  const cvs = document.createElement('canvas');
+  cvs.width = cvs.height = size;
+  const ctx = cvs.getContext('2d');
+  const src = srcCanvas;
+  const side = Math.min(src.width, src.height);
+  const sx = (src.width - side) / 2, sy = (src.height - side) / 2;
+  ctx.drawImage(src, sx, sy, side, side, 0, 0, size, size);
+  return cvs;
+}
+
+// ── MODE 1: VINTAGE B&W STRIP ────────────────────────────
+function buildVintage(canvas) {
+  const border = 32, gap = 22, photoW = 420, photoH = Math.round(photoW * 0.75);
+  canvas.width  = photoW + border * 2;
+  canvas.height = photoH * 3 + gap * 2 + border * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  capturedFrames.forEach((frame, i) => {
+    const y   = border + i * (photoH + gap);
+    const bw  = applyGrayscale(cropToRatio(frame, photoW, photoH));
+    ctx.drawImage(bw, border, y, photoW, photoH);
+  });
+}
+
+function applyGrayscale(srcCvs) {
+  const ctx = srcCvs.getContext('2d');
+  const id = ctx.getImageData(0, 0, srcCvs.width, srcCvs.height);
+  const d  = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const g = Math.round(0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]);
+    const c = clamp(Math.round((g - 128) * 1.22 + 128), 0, 255);
+    d[i] = d[i+1] = d[i+2] = c;
+  }
+  ctx.putImageData(id, 0, 0);
+  return srcCvs;
+}
+
+// ── MODE 2: SOFT PASTEL KAWAII GRID ─────────────────────
+function buildPastel(canvas) {
+  const cell = 420, gap = 0;
+  canvas.width  = cell * 2;
+  canvas.height = cell * 2;
+  const ctx = canvas.getContext('2d');
+
+  // soft lavender background (visible if any gap)
+  ctx.fillStyle = '#ede0f7';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  capturedFrames.forEach((frame, i) => {
+    const col = i % 2, row = Math.floor(i / 2);
+    const processed = applyPastel(cropSquare(frame, cell));
+    ctx.drawImage(processed, col * cell, row * cell, cell, cell);
+  });
+
+  // dreamy vignette over the whole grid
+  const vgr = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.width*0.28, canvas.width/2, canvas.height/2, canvas.width*0.75);
+  vgr.addColorStop(0, 'rgba(253,232,248,0)');
+  vgr.addColorStop(1, 'rgba(200,160,230,0.22)');
+  ctx.fillStyle = vgr;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function applyPastel(srcCvs) {
+  const ctx = srcCvs.getContext('2d');
+  const id  = ctx.getImageData(0, 0, srcCvs.width, srcCvs.height);
+  const d   = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i], g = d[i+1], b = d[i+2];
+
+    // 1. Slightly desaturate toward pastel midtones
+    const lum = 0.299*r + 0.587*g + 0.114*b;
+    r = clamp(Math.round(lum*0.28 + r*0.72), 0, 255);
+    g = clamp(Math.round(lum*0.28 + g*0.72), 0, 255);
+    b = clamp(Math.round(lum*0.28 + b*0.72), 0, 255);
+
+    // 2. Lift shadows (fade to white → airy pastel look)
+    r = clamp(Math.round(r * 0.82 + 45), 0, 255);
+    g = clamp(Math.round(g * 0.82 + 38), 0, 255);
+    b = clamp(Math.round(b * 0.82 + 52), 0, 255);
+
+    // 3. Nudge toward pink/lavender — boost red & blue slightly
+    r = clamp(Math.round(r * 1.06 + 6), 0, 255);
+    b = clamp(Math.round(b * 1.08 + 10), 0, 255);
+    g = clamp(Math.round(g * 0.96), 0, 255);
+
+    d[i] = r; d[i+1] = g; d[i+2] = b;
+  }
+  ctx.putImageData(id, 0, 0);
+
+  // soft bloom overlay
+  const bloom = ctx.createRadialGradient(
+    srcCvs.width/2, srcCvs.height/2, 0,
+    srcCvs.width/2, srcCvs.height/2, srcCvs.width*0.7
+  );
+  bloom.addColorStop(0, 'rgba(255,240,255,0.18)');
+  bloom.addColorStop(1, 'rgba(200,160,240,0.08)');
+  ctx.fillStyle = bloom;
+  ctx.fillRect(0, 0, srcCvs.width, srcCvs.height);
+
+  return srcCvs;
+}
+
+// ── MODE 3: 90s DISPOSABLE FILM STRIP ───────────────────
+function buildDisposable(canvas) {
+  const border = 36, gap = 26;
+  const frameW = 300, frameH = Math.round(frameW * (4/3));
+
+  canvas.width  = frameW * 4 + gap * 3 + border * 2;
+  canvas.height = frameH + border * 2 + 28; // extra for sprocket rows
+
+  const ctx = canvas.getContext('2d');
+
+  // Deep film base
+  ctx.fillStyle = '#0e0a0c';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Subtle grain texture
+  applyGrain(ctx, canvas.width, canvas.height);
+
+  // Sprocket hole strips top + bottom
+  drawSprocketStrip(ctx, canvas.width, 0, 14);
+  drawSprocketStrip(ctx, canvas.width, canvas.height - 14, 14);
+
+  // Film number labels between frames
+  ctx.font = '600 9px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(212,169,74,0.5)';
+  ctx.textAlign = 'center';
+
+  capturedFrames.forEach((frame, i) => {
+    const x = border + i * (frameW + gap);
+    const y = 14 + Math.round((canvas.height - 28 - frameH) / 2);
+
+    // Frame border glow
+    ctx.save();
+    ctx.strokeStyle = 'rgba(212,169,74,0.18)';
+    ctx.lineWidth   = 1.5;
+    ctx.strokeRect(x - 1.5, y - 1.5, frameW + 3, frameH + 3);
+    ctx.restore();
+
+    const warm = applyWarm(cropToRatio(frame, frameW, frameH));
+    ctx.drawImage(warm, x, y, frameW, frameH);
+
+    // Frame number
+    ctx.fillText(`${String(i+1).padStart(2,'0')}A`, x + frameW/2, y + frameH + 20);
+  });
+}
+
+function drawSprocketStrip(ctx, W, y, h) {
+  // Dark strip
+  ctx.fillStyle = '#0a0608';
+  ctx.fillRect(0, y, W, h);
+  // Holes
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  const hw = 10, hh = 7, spacing = 32;
+  for (let x = 14; x < W - 14; x += spacing) {
+    ctx.beginPath();
+    ctx.roundRect(x, y + (h - hh)/2, hw, hh, 2);
+    ctx.fill();
+  }
+}
+
+function applyGrain(ctx, w, h) {
+  // Subtle noise overlay
+  const id = ctx.createImageData(w, h);
+  const d  = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const noise = (Math.random() - 0.5) * 18;
+    d[i] = d[i+1] = d[i+2] = clamp(Math.round(12 + noise), 0, 255);
+    d[i+3] = 28;
+  }
+  ctx.putImageData(id, 0, 0);
+}
+
+function applyWarm(srcCvs) {
+  const ctx = srcCvs.getContext('2d');
+  const id  = ctx.getImageData(0, 0, srcCvs.width, srcCvs.height);
+  const d   = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i], g = d[i+1], b = d[i+2];
+    // warm film grade
+    r = clamp(Math.round(r * 1.13 + 14), 0, 255);
+    g = clamp(Math.round(g * 1.03 +  5), 0, 255);
+    b = clamp(Math.round(b * 0.80 -  8), 0, 255);
+    // slight desaturation toward cream
+    const lum = 0.299*r + 0.587*g + 0.114*b;
+    r = clamp(Math.round(lum*0.16 + r*0.84), 0, 255);
+    g = clamp(Math.round(lum*0.16 + g*0.84), 0, 255);
+    b = clamp(Math.round(lum*0.16 + b*0.84), 0, 255);
+    d[i] = r; d[i+1] = g; d[i+2] = b;
+  }
+  ctx.putImageData(id, 0, 0);
+
+  // Vignette
+  const vgr = ctx.createRadialGradient(
+    srcCvs.width/2, srcCvs.height/2, Math.min(srcCvs.width, srcCvs.height)*0.28,
+    srcCvs.width/2, srcCvs.height/2, Math.max(srcCvs.width, srcCvs.height)*0.76
+  );
+  vgr.addColorStop(0, 'rgba(0,0,0,0)');
+  vgr.addColorStop(1, 'rgba(0,0,0,0.42)');
+  ctx.fillStyle = vgr;
+  ctx.fillRect(0, 0, srcCvs.width, srcCvs.height);
+  return srcCvs;
+}
+
+// ─── SAVE / DOWNLOAD ─────────────────────────────────────
+function saveImage() {
+  const canvas = document.getElementById('result-canvas');
+  try {
+    const dataUrl = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `foto-${currentMode}-${Date.now()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast('Downloaded to Files ✓');
+  } catch (e) {
+    const dataUrl = canvas.toDataURL('image/png');
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;"><img src="${dataUrl}" style="max-width:100%;display:block;"/><p style="color:#fff;text-align:center;font-family:sans-serif;padding:14px;font-size:13px;">Long-press the image → Save to Photos</p></body></html>`);
+    } else {
+      showToast('Long-press the image to save');
+    }
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
